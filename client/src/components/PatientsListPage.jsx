@@ -1,6 +1,9 @@
-import Table from "./Table"
+import { useState } from 'react';
+import { useQuery, useQueryClient } from 'react-query';
+import Switch from 'react-switch';
+
+import Table from './Table';
 import { Title1 } from './System';
-import { useQuery } from 'react-query';
 import { getPatients } from '../api';
 
 const LoadingTableBody = ({ rowCount = 5, colCount = 4 }) => <Table.Body className="animate-pulse">
@@ -30,9 +33,7 @@ const PatientTableBody = ({ patients }) => {
   </Table.Body >
 }
 
-const PatientsTable = () => {
-  const { data: response, isLoading } = useQuery(['patients'], getPatients());
-
+const PatientsTable = ({ patients, isLoading }) => {
   return <Table className='bg-white'>
     <Table.Head>
       <Table.HeadItem>Id</Table.HeadItem>
@@ -41,15 +42,56 @@ const PatientsTable = () => {
       <Table.HeadItem>Status</Table.HeadItem>
     </Table.Head>
     {
-      isLoading ? <LoadingTableBody rowCount={5} colCount={4} /> : <PatientTableBody patients={response.data} />
+      isLoading ? <LoadingTableBody rowCount={5} colCount={4} /> : <PatientTableBody patients={patients} />
     }
   </Table>
 }
 
+const ActivePatientsFilter = ({ checked, onToggle }) => {
+  const switchConfig = {
+    checkedIcon: false,
+    uncheckedIcon: false,
+    width: 40,
+    height: 20,
+    handleDiameter: 17,
+    onColor: '#343D55',
+    offColor: '#C2C5CC',
+  };
+
+  return (
+    <div className='align-middle filter-container my-4'>
+      <span>INACTIVE</span>
+      <Switch
+        className='filter-switch'
+        onChange={onToggle}
+        checked={checked}
+        {...switchConfig}
+      />
+      <span>ACTIVE</span>
+    </div>
+  );
+};
+
 const PatientsListPage = () => {
+  const [activeOnly, setActiveOnly] = useState(false);
+  const { data: response, isFetching } = useQuery(['patients'], getPatients(activeOnly));
+  const queryClient = useQueryClient();
+
+  const onToggle = () =>  {
+    if (isFetching) {
+      return;
+    }
+    queryClient.clear();
+    queryClient.refetchQueries(['patients'], getPatients(!activeOnly));
+    setActiveOnly(!activeOnly);
+  };
+
   return <main className='max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'>
-    <Title1>All Patients</Title1>
-    <PatientsTable />
+    <div className='all-patients-header'>
+      <Title1>All Patients</Title1>
+      <ActivePatientsFilter checked={activeOnly} onToggle={onToggle} />
+    </div>
+    <PatientsTable isLoading={isFetching} patients={response?.data} />
   </main >
 }
 
