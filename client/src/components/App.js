@@ -5,6 +5,7 @@ import {
 import PatientsListPage from './PatientsListPage';
 import Nav from './Nav';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import PatientPage from './PatientPage';
 
 const queryClient = new QueryClient()
 
@@ -18,6 +19,7 @@ function App() {
           <Nav />
           <Routes>
             <Route path='/' element={<PatientsListPage />} />
+            <Route path='/patients/:id' element={<PatientPage />} />
           </Routes>
         </BrowserRouter>
       </Container>

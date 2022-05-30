@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import Switch from 'react-switch';
+import { useNavigate } from 'react-router-dom';
 
 import Table from './Table';
 import { Title1 } from './System';
@@ -19,10 +20,14 @@ const LoadingTableBody = ({ rowCount = 5, colCount = 4 }) => <Table.Body classNa
 </Table.Body>
 
 const PatientTableBody = ({ patients }) => {
+  const navigate = useNavigate();
+
   return <Table.Body>
     {
       patients.map((patient) => {
-        return <Table.Row key={`patient-row-${patient.id}`}>
+        const onClick = () => navigate(`/patients/${patient.id}`);
+
+        return <Table.Row key={`patient-row-${patient.id}`} onClick={onClick}>
           <Table.DataItem>{patient.id}</Table.DataItem>
           <Table.DataItem>{patient.firstName}</Table.DataItem>
           <Table.DataItem>{patient.email}</Table.DataItem>
